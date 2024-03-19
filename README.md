@@ -17,7 +17,7 @@ Tech stack to be used along with Flutter:
 2. Client Logic
    * Firebase for Flutter: To integrate Firebase with the app, incl. the core package, Firestore, Firebase Auth, Firebase Storage, [firebase_ui_firestore](https://pub.dev/packages/firebase_ui_firestore) 
    * [firebase-messaging](https://pub.dev/packages/firebase_messaging): For setting up FCM on the client side, separately mentioned as it is optional
-   * [libsignal_protocol_dart](libsignal_protocol_dart): (Optional) Messages will be made end-to-end encrypted using an implementation of the Signal Protocol
+   * [libsignal_protocol_dart](https://pub.dev/packages/libsignal_protocol_dart): (Optional) Messages will be made end-to-end encrypted using an implementation of the Signal Protocol
    * [bloc](https://bloclibrary.dev/): For state management on the client side
 3. UI/UX
    * [curved_navigation_bar](https://pub.dev/packages/curved_navigation_bar): An interesting widget which I might use instead of the Material bottom nav bar if it fits with the rest of the UI design
@@ -28,8 +28,10 @@ Tech stack to be used along with Flutter:
 ## Roadmap
 Note: This may be updated along the way with changes in the features planned
 - [x] Set up the Firebase project
-- [ ] Set up Bloc x Firebase and implement Google OAuth with a simple landing page pre- and post-login
+- [x] Set up the Bloc skeleton
+- [x] Implement Google OAuth with a simple landing page pre- and post-login
 - [ ] Work on a simple theme and branding, which may be changed later
+- [ ] Set up Firestore, and add users to it
 - [ ] Start work on a student discovery page and set up a user profile page
 - [ ] Integrate flutter_chat_ui with the Firebase project and set up simple text chats
 - [ ] Implement push notifications

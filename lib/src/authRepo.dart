@@ -4,6 +4,9 @@ import 'dart:typed_data';
 
 import 'package:flutter_cache_manager/file.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:padhaihub/src/src.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -90,18 +93,31 @@ class AuthenticationRepository {
   @visibleForTesting
   static const userCacheKey = '__user_cache_key__';
 
-  /// Stream of [User] which will emit the current user when
+  /// Stream of [UserModel] which will emit the current user when
   /// the authentication state changes.
   ///
-  /// Emits [User.empty] if the user is not authenticated.
+  /// Emits [UserModel.empty] if the user is not authenticated.
 
-  Future<File> _saveToCache(User user) {
+  Future<File> _saveToCache(UserModel user) {
     return _cache.putFile("auth_result", Uint8List.fromList(utf8.encode(jsonEncode({userCacheKey: user.toJSON()}))));;
   }
 
-  Stream<User> get user {
+  Future<void> createChatUser(UserModel user) async {
+    await FirebaseChatCore.instance.createUserInFirestore(
+      User(
+        firstName: user.name,
+        id: user.id, // UID from Firebase Authentication
+        imageUrl: user.photo,
+      ),
+    );
+  }
+
+  Stream<UserModel> get user {
     return _firebaseAuth.authStateChanges().map((firebaseUser) {
-      final user = firebaseUser == null ? User.empty : firebaseUser.toUser;
+      final user = firebaseUser == null ? UserModel.empty : firebaseUser.toUser;
+      if (firebaseUser != null) {
+        createChatUser(user);
+      }
       _saveToCache(user);
       // _cache.write(key: userCacheKey, value: user);
       return user;
@@ -109,14 +125,14 @@ class AuthenticationRepository {
   }
 
   /// Returns the current cached user.
-  /// Defaults to [User.empty] if there is no cached user.
-  Future<User> get currentUser async {
+  /// Defaults to [UserModel.empty] if there is no cached user.
+  Future<UserModel> get currentUser async {
     final res = await _cache.getFileFromCache("auth_result");
     final data = await res?.file.readAsString();
     if (data == null) {
-      return User.empty;
+      return UserModel.empty;
     } else {
-      return User.fromJSON(jsonDecode(data)[userCacheKey]);
+      return UserModel.fromJSON(jsonDecode(data)[userCacheKey]);
     }
     // return _cache.read<User>(key: userCacheKey) ?? User.empty;
   }
@@ -156,7 +172,7 @@ class AuthenticationRepository {
       await Future.wait([
         _firebaseAuth.signOut(),
         _googleSignIn.signOut(),
-        _saveToCache(User.empty),
+        _saveToCache(UserModel.empty),
       ]);
     } catch (_) {
       throw LogOutFailure();
@@ -165,8 +181,8 @@ class AuthenticationRepository {
 }
 
 extension on firebase_auth.User {
-  /// Maps a [firebase_auth.User] into a [User].
-  User get toUser {
-    return User(id: uid, email: email, name: displayName, photo: photoURL);
+  /// Maps a [firebase_auth.User] into a [UserModel].
+  UserModel get toUser {
+    return UserModel(id: uid, email: email, name: displayName, photo: photoURL);
   }
 }

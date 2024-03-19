@@ -18,7 +18,7 @@ final class HomeState extends Equatable {
 
   final HomeStatus status;
 
-  HomeState copyWith({HomeStatus? status, User? user}) {
+  HomeState copyWith({HomeStatus? status, UserModel? user}) {
     return HomeState._(status: status ?? this.status);
   }
 }

@@ -50,6 +50,8 @@ dependencies:
   formz: ^0.7.0
   simple_animations: ^5.0.2
   curved_navigation_bar: ^1.0.3
+  flutter_chat_ui: ^1.6.12
+  flutter_firebase_chat_core: ^1.6.7
 
 dev_dependencies:
   flutter_test:

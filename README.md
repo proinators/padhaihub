@@ -31,9 +31,9 @@ Note: This may be updated along the way with changes in the features planned
 - [x] Set up the Bloc skeleton
 - [x] Implement Google OAuth with a simple landing page pre- and post-login
 - [ ] Work on a simple theme and branding, which may be changed later
-- [ ] Set up Firestore, and add users to it
-- [ ] Start work on a student discovery page and set up a user profile page
-- [ ] Integrate flutter_chat_ui with the Firebase project and set up simple text chats
+- [x] Set up Firestore, and add users to it
+- [x] Start work on a student discovery page and set up a user profile page
+- [x] Integrate flutter_chat_ui with the Firebase project and set up simple text chats
 - [ ] Implement push notifications
 - [ ] Set up file sharing on one-one chats
 - [ ] Set up a public file sharing platform with topic-based categorization

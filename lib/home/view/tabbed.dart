@@ -1,4 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flow_builder/flow_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:padhaihub/app/app.dart';
@@ -22,6 +23,7 @@ class TabbedHomePage extends StatelessWidget {
       create: (context) => HomeCubit(),
       child: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) {
+          // context.flow<NavData>().update((navData) => navData.copyWith(homeStatus: state.status));
           return Scaffold(
             appBar: AppBar(
               actions: [

@@ -3,6 +3,7 @@ part of 'home_cubit.dart';
 enum HomeStatus {
   overview,
   chat,
+  discoverUser,
   initial,
 }
 
@@ -11,6 +12,7 @@ final class HomeState extends Equatable {
 
   const HomeState.initial() : this._(status: HomeStatus.initial);
   const HomeState.overview() : this._(status: HomeStatus.overview);
+  const HomeState.discoverUser() : this._(status: HomeStatus.discoverUser);
   const HomeState.chat() : this._(status: HomeStatus.chat);
 
   @override

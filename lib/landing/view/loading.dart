@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:padhaihub/app/app.dart';
 import 'package:padhaihub/config/config.dart';
 
 class LoadingPage extends StatelessWidget {
@@ -9,10 +10,8 @@ class LoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SpinKitPulse(
-        color: brandingColor,
-      ),
+    return Scaffold(
+      body: LoadingWidget(),
     );
   }
 }

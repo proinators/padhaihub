@@ -2,6 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flow_builder/flow_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:padhaihub/home/cubit/home_cubit.dart';
 import '../app.dart';
 import '../../config/theme.dart';
 
@@ -67,8 +68,8 @@ class AppView extends StatelessWidget {
     Map<Brightness, ThemeData> themes = themeBuilder(null, null);
     return MaterialApp(
       title: 'PadhaiHub',
-      home: FlowBuilder<AppStatus>(
-        state: context.select((AppBloc bloc) => bloc.state.status),
+      home: FlowBuilder<NavData>(
+        state: context.select((AppBloc bloc) => NavData(appStatus: bloc.state.status)),
         onGeneratePages: onGenerateAppViewPages,
       ),
       theme: themes[Brightness.light],

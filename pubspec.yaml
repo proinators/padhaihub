@@ -52,6 +52,8 @@ dependencies:
   curved_navigation_bar: ^1.0.3
   flutter_chat_ui: ^1.6.12
   flutter_firebase_chat_core: ^1.6.7
+  cached_network_image: ^3.3.1
+  uuid: ^4.3.3
 
 dev_dependencies:
   flutter_test:

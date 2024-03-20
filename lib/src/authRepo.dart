@@ -103,6 +103,7 @@ class AuthenticationRepository {
   }
 
   Future<void> createChatUser(UserModel user) async {
+    // TODO: Instead of creating the user everytime, check if it exists
     await FirebaseChatCore.instance.createUserInFirestore(
       User(
         firstName: user.name,

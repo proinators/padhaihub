@@ -13,6 +13,7 @@ class HomeCubit extends Cubit<HomeState> {
     return [
       [Icons.home_rounded, "Home"],
       [Icons.chat_bubble_rounded, "Chat"],
+      [Icons.explore, "Explore"],
     ];
   }
 
@@ -23,6 +24,9 @@ class HomeCubit extends Cubit<HomeState> {
         break;
       case 1:
         emit(HomeState.chat());
+        break;
+      case 2:
+        emit(HomeState.discoverUser());
         break;
     }
   }

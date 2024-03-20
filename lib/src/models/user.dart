@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 /// {@template user}
 /// User model
@@ -28,6 +29,14 @@ class UserModel extends Equatable {
 
   factory UserModel.fromJSON(Map<String, dynamic> json) {
     return UserModel(id: json["id"], email: json["email"] ?? "", name: json["name"] ?? "", photo: json["photo"] ?? "");
+  }
+
+  types.User toChatUser() {
+    return types.User(
+      firstName: name,
+      id: id, // UID from Firebase Authentication
+      imageUrl: photo,
+    );
   }
 
   Map<String, dynamic> toJSON() {

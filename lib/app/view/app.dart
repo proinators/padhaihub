@@ -3,6 +3,7 @@ import 'package:flow_builder/flow_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:padhaihub/home/cubit/home_cubit.dart';
+import 'package:padhaihub/src/storageRepo.dart';
 import '../app.dart';
 import '../../config/theme.dart';
 
@@ -13,10 +14,12 @@ import '../routes/routes.dart';
 class App extends StatelessWidget {
   const App({
     required AuthenticationRepository authenticationRepository,
+    required this.storageRepository,
     super.key,
   }) : _authenticationRepository = authenticationRepository;
 
   final AuthenticationRepository _authenticationRepository;
+  final StorageRepository storageRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +28,7 @@ class App extends StatelessWidget {
       child: BlocProvider(
         create: (_) => AppBloc(
           authenticationRepository: _authenticationRepository,
+          storageRepository: storageRepository,
         ),
         child: const AppView(),
       ),

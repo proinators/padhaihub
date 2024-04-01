@@ -15,8 +15,10 @@ Future<void> main() async {
   );
 
   final authenticationRepository = AuthenticationRepository();
+  final storageRepository = StorageRepository();
   await authenticationRepository.user.first;
+  storageRepository.init();
 
-  runApp(App(authenticationRepository: authenticationRepository));
+  runApp(App(authenticationRepository: authenticationRepository, storageRepository: storageRepository,));
 }
 

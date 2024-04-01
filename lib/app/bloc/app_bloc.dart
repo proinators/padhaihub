@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:padhaihub/src/storageRepo.dart';
 
 import '../../src/authRepo.dart';
 import '../../src/models/models.dart';
@@ -12,7 +13,7 @@ part 'app_event.dart';
 part 'app_state.dart';
 
 class AppBloc extends Bloc<AppEvent, AppState> {
-  AppBloc({required AuthenticationRepository authenticationRepository})
+  AppBloc({required AuthenticationRepository authenticationRepository, required this.storageRepository})
       : _authenticationRepository = authenticationRepository,
         super(AppState.initial()) {
     on<AppInitial>(_onInit);
@@ -24,6 +25,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   }
 
   final AuthenticationRepository _authenticationRepository;
+  final StorageRepository storageRepository;
   late final StreamSubscription<UserModel> _userSubscription;
 
   void _onInit(AppInitial event, Emitter<AppState> emit) async {

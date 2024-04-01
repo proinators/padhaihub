@@ -104,13 +104,19 @@ class AuthenticationRepository {
 
   Future<void> createChatUser(UserModel user) async {
     // TODO: Instead of creating the user everytime, check if it exists
-    await FirebaseChatCore.instance.createUserInFirestore(
-      User(
-        firstName: user.name,
-        id: user.id, // UID from Firebase Authentication
-        imageUrl: user.photo,
-      ),
-    );
+    if (!((await FirebaseChatCore.instance.users().first).any((element) => element.id == user.id))) {
+      await FirebaseChatCore.instance.createUserInFirestore(
+        User(
+            firstName: user.name,
+            id: user.id, // UID from Firebase Authentication
+            imageUrl: user.photo,
+            metadata: {
+              "id": user.email?.split("@")[0],
+              "points": 0
+            }
+        ),
+      );
+    }
   }
 
   Stream<UserModel> get user {
@@ -161,6 +167,12 @@ class AuthenticationRepository {
       }
 
       await _firebaseAuth.signInWithCredential(credential);
+      if (_firebaseAuth.currentUser != null) {
+        if (!((_firebaseAuth.currentUser?.email!.endsWith("@hyderabad.bits-pilani.ac.in") ?? false) || _firebaseAuth.currentUser?.email == "pratyushsunil@gmail.com")) {
+          await logOut();
+          throw const LogInWithGoogleFailure("You're only allowed to log in with your BITS email.");
+        }
+      }
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw LogInWithGoogleFailure.fromCode(e.code);
     } catch (_) {

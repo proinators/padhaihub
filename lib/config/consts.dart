@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Color brandingColor = const Color(0xFF1E88E5);
+Color brandingColor = const Color(0xFFAB2DFF);
 
 // Light theme custom colors
 Color lightDangerColor = const Color(0xFFE53935);

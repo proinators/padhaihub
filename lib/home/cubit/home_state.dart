@@ -4,6 +4,7 @@ enum HomeStatus {
   overview,
   chat,
   discoverUser,
+  profile,
   initial,
 }
 
@@ -14,6 +15,7 @@ final class HomeState extends Equatable {
   const HomeState.overview() : this._(status: HomeStatus.overview);
   const HomeState.discoverUser() : this._(status: HomeStatus.discoverUser);
   const HomeState.chat() : this._(status: HomeStatus.chat);
+  const HomeState.profile() : this._(status: HomeStatus.profile);
 
   @override
   List<Object?> get props => [status];

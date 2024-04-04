@@ -56,6 +56,8 @@ jobs:
         with:
           fileName: upload-keystore.jks
           encodedString: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      - name: Debug - Print directory structure
+        run: ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
       - name: Create key.properties
         run: |
           echo "storeFile=${{ steps.android_keystore.outputs.filePath }}" > android/key.properties
@@ -64,16 +66,10 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
       - name: Download google-services.json
         id: google-services
-        uses: timheuer/base64-to-file@v1.0.3
-        with:
-          fileName: ${{ github.workspace }}/android/app/google-services.json
-          encodedString: ${{ secrets.GOOGLE_SERVICES }}
+        run: echo "${{ secrets.GOOGLE_SERVICES }}" | base64 --decode > ${{ github.workspace }}/android/app/google-services.json
       - name: Download firebase_options.dart
         id: firebase_options
-        uses: timheuer/base64-to-file@v1.0.3
-        with:
-          fileName: ${{ github.workspace }}/lib/firebase_options.dart
-          encodedString: ${{ secrets.FIREBASE_OPTIONS }}
+        run: echo "${{ secrets.FIREBASE_OPTIONS }}" | base64 --decode > ${{ github.workspace }}/lib/firebase_options.dart
       - uses: actions/setup-java@v3
         with:
           distribution: 'zulu'

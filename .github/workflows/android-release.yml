@@ -87,10 +87,17 @@ jobs:
       - run: flutter clean
 
       - name: Start Android Release Build
-        run: flutter build appbundle
+        run: flutter build apk --release
 
       - name: Upload Android Release
         uses: actions/upload-artifact@v2
         with:
           name: android-release
-          path: build/app/outputs/bundle/release/app-release.aab
+          path: build/app/outputs/apk/release/app-release.apk
+
+      - name: Release App
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/app/outputs/apk/release/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

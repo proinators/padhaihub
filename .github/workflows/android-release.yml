@@ -62,6 +62,12 @@ jobs:
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/key.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+      - name: Download firebase_options.dart
+        id: firebase_options
+        uses: timheuer/base64-to-file@v1.0.3
+        with:
+          fileName: lib/firebase_options.dart
+          encodedString: ${{ secrets.FIREBASE_OPTIONS }}
       - uses: actions/setup-java@v3
         with:
           distribution: 'zulu'

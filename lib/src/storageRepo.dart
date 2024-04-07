@@ -5,6 +5,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:padhaihub/src/src.dart';
 
 class StorageRepository {
 
@@ -19,7 +20,12 @@ class StorageRepository {
     _storageRef = FirebaseStorage.instance.ref();
   }
 
-  Future<void> uploadFile(String fileName, String localUri, List<types.User> users) async {
+  Future<void> uploadFile(String fileName, String localUri, List<types.User> users, types.User authUser, {bool isEdit=false}) async {
+    if(!isEdit) {
+      Map<String, dynamic> newMeta = authUser.metadata!;
+      newMeta["files_shared"]++;
+      FirebaseChatCore.instance.updateUserInFirestore(authUser.copyWith(metadata: newMeta));
+    }
     users.forEach((user) async {
       Reference userRef = _storageRef.child("users/${user.id}/$fileName");
       File file = File(localUri);
@@ -43,8 +49,14 @@ class StorageRepository {
     return filePath;
   }
 
-  Future<void> deleteFile(types.User authUser, types.Room room, types.FileMessage message) async {
+  Future<void> deleteFile(types.User authUser, types.Room room, types.FileMessage message, {bool isEdit=false}) async {
     if (message.author.id == authUser.id) {
+      // (await FirebaseChatCore.instance.users().first).where((element) => element.id == authUser.id)
+      if(!isEdit) {
+        Map<String, dynamic> newMeta = message.author.metadata!;
+        newMeta["files_shared"]--;
+        FirebaseChatCore.instance.updateUserInFirestore(message.author.copyWith(metadata: newMeta));
+      }
       for (types.User user in room.users) {
         print(_storageRef.child("users/${user.id}/${message.uri}.pdf").fullPath);
         _storageRef.child("users/${user.id}/${message.uri}.pdf").delete();

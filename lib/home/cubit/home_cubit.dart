@@ -7,7 +7,7 @@ import 'package:padhaihub/src/src.dart';
 part 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  HomeCubit() : super(HomeState.overview());
+  HomeCubit() : super(HomeState.overview(HomeStatus.initial));
 
   List<List> getPageIcons() {
     return [
@@ -21,16 +21,16 @@ class HomeCubit extends Cubit<HomeState> {
   void changePage(int index) {
     switch(index) {
       case 0:
-        emit(HomeState.overview());
+        emit(HomeState.overview(state.status));
         break;
       case 1:
-        emit(HomeState.chat());
+        emit(HomeState.chat(state.status));
         break;
       case 2:
-        emit(HomeState.discoverUser());
+        emit(HomeState.discoverUser(state.status));
         break;
       case 3:
-        emit(HomeState.profile());
+        emit(HomeState.profile(state.status));
         break;
     }
   }

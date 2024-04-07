@@ -26,15 +26,17 @@ List<Page<dynamic>> onGenerateAppViewPages(
 }
 
 class NavData {
-  const NavData({this.appStatus, this.homeStatus, this.room});
+  const NavData({this.appStatus, this.user, this.homeStatus, this.room});
 
   final AppStatus? appStatus;
+  final types.User? user;
   final HomeStatus? homeStatus;
   final types.Room? room;
 
-  NavData copyWith({AppStatus? appStatus, HomeStatus? homeStatus, types.Room? room}) {
+  NavData copyWith({AppStatus? appStatus, types.User? user, HomeStatus? homeStatus, types.Room? room}) {
     return NavData(
       appStatus: appStatus ?? this.appStatus,
+      user: user ?? this.user,
       homeStatus: homeStatus ?? this.homeStatus,
       room: room ?? this.room,
     );

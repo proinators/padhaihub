@@ -58,6 +58,10 @@ class LandingPageWidget extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
+                Image(
+                  image: AssetImage("assets/icon/icon.png"),
+                  fit: BoxFit.fitHeight,
+                ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(

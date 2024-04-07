@@ -4,10 +4,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:padhaihub/src/storageRepo.dart';
+import 'package:padhaihub/src/src.dart';
 
-import '../../src/authRepo.dart';
-import '../../src/models/models.dart';
 
 part 'app_event.dart';
 part 'app_state.dart';
@@ -20,7 +18,9 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     on<_AppUserChanged>(_onUserChanged);
     on<AppLogoutRequested>(_onLogoutRequested);
     _userSubscription = _authenticationRepository.user.listen(
-          (user) => add(_AppUserChanged(user)),
+          (user) {
+            add(_AppUserChanged(user));
+          },
     );
   }
 
@@ -29,18 +29,18 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   late final StreamSubscription<UserModel> _userSubscription;
 
   void _onInit(AppInitial event, Emitter<AppState> emit) async {
-    final user = await _authenticationRepository.currentUser;
+    final userModel = await _authenticationRepository.currentUser;
     emit(
-      user.isNotEmpty
-          ? AppState.authenticated(user)
+      userModel.isNotEmpty
+          ? AppState.authenticated(userModel)
           : const AppState.unauthenticated(),
     );
   }
 
   void _onUserChanged(_AppUserChanged event, Emitter<AppState> emit) {
     emit(
-      event.user.isNotEmpty
-          ? AppState.authenticated(event.user)
+      event.userModel.isNotEmpty
+          ? AppState.authenticated(event.userModel)
           : const AppState.unauthenticated(),
     );
   }

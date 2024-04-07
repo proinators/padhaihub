@@ -15,8 +15,8 @@ import 'package:uuid/uuid.dart';
 part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
-  ChatCubit(StorageRepository storageRepository, types.User authUser, types.Room room)
-      : storageRepo = storageRepository, super(ChatState.roomStart(authUser, room));
+  ChatCubit(StorageRepository storageRepository, types.Room room)
+      : storageRepo = storageRepository, super(ChatState.roomStart(room));
 
   final uuid = Uuid();
   final StorageRepository storageRepo;
@@ -25,7 +25,16 @@ class ChatCubit extends Cubit<ChatState> {
     return uuid.v4();
   }
 
+  void listenAuth() async {
+    FirebaseChatCore.instance.currUser().listen(
+            (event) {
+              emit(state.copyWith(authUser: event));
+            }
+    );
+  }
+
   void onSendPressed(types.PartialText message) {
+    FirebaseChatCore.instance.updateLastSeen(FirebaseChatCore.instance.firebaseUser!.uid);
     FirebaseChatCore.instance.sendMessage(message, state.room!.id);
   }
 
@@ -42,7 +51,7 @@ class ChatCubit extends Cubit<ChatState> {
 
     String fileUuid = uuidGen();
     try {
-      storageRepo.uploadFile("$fileUuid.pdf", result.files.single.path!, state.room!.users).then(
+      storageRepo.uploadFile("$fileUuid.pdf", result.files.single.path!, state.room!.users, state.authUser!).then(
               (value) {
             if (result.files.single.path != null) {
               final message = types.PartialFile(
@@ -82,7 +91,7 @@ class ChatCubit extends Cubit<ChatState> {
       //       break;
       //   }
       // });
-      String localFilename = await storageRepo.downloadFile(state.authUser.id, message.uri, message.name, (TaskState taskState, String filePath) {
+      String localFilename = await storageRepo.downloadFile(state.authUser!.id, message.uri, message.name, (TaskState taskState, String filePath) {
         switch(taskState) {
           case TaskState.paused:
             emit(state.copyWith(infoMessage: "Download paused."));
@@ -107,7 +116,7 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void onMessageLongPress(BuildContext context, types.Message message) {
-    if (message.author.id == state.authUser.id) {
+    if (message.author.id == state.authUser!.id) {
       showModalBottomSheet(context: context, builder: (BuildContext modalContext) {
         return SizedBox(
           height: (message is types.FileMessage) ? 200 : 100,
@@ -165,15 +174,16 @@ class ChatCubit extends Cubit<ChatState> {
 
       String fileUuid = uuidGen();
       try {
-        storageRepo.uploadFile("$fileUuid.pdf", result.files.single.path!, state.room!.users).then(
-          (value) => FirebaseChatCore.instance.updateMessage(
-            message.copyWith(
-                name: result.files.single.name,
-                size: result.files.single.size,
-                uri: fileUuid
-            ),
-            state.room!.id
-        ));
+        storageRepo.uploadFile("$fileUuid.pdf", result.files.single.path!, state.room!.users, state.authUser!, isEdit: true).then(
+          (value) => storageRepo.deleteFile(state.authUser!, state.room!, message, isEdit: true).then(
+                  (_) => FirebaseChatCore.instance.updateMessage(
+                      message.copyWith(
+                          name: result.files.single.name,
+                          size: result.files.single.size,
+                          uri: fileUuid
+                      ),
+                      state.room!.id
+                  )));
       } catch (e) {
         emit(state.copyWith(errorMessage: (e.toString() != "") ? e.toString() : "Could not upload file."));
         return;
@@ -185,7 +195,7 @@ class ChatCubit extends Cubit<ChatState> {
   void _deleteMessage(types.Message message) {
     FirebaseChatCore.instance.deleteMessage(state.room!.id, message.id);
     if (message is types.FileMessage) {
-      storageRepo.deleteFile(state.authUser, state.room!, message);
+      storageRepo.deleteFile(state.authUser!, state.room!, message);
     }
   }
 

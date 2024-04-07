@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_cache_manager/file.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -103,16 +103,17 @@ class AuthenticationRepository {
   }
 
   Future<void> createChatUser(UserModel user) async {
-    // TODO: Instead of creating the user everytime, check if it exists
-    if (!((await FirebaseChatCore.instance.users().first).any((element) => element.id == user.id))) {
+    if (await FirebaseChatCore.instance.checkIfExists(user.id)) {
+      FirebaseChatCore.instance.updateLastSeen(user.id);
+    } else {
       await FirebaseChatCore.instance.createUserInFirestore(
-        User(
+        types.User(
             firstName: user.name,
             id: user.id, // UID from Firebase Authentication
             imageUrl: user.photo,
             metadata: {
               "id": user.email?.split("@")[0],
-              "points": 0
+              "files_shared": 0
             }
         ),
       );
@@ -121,7 +122,7 @@ class AuthenticationRepository {
 
   Stream<UserModel> get user {
     return _firebaseAuth.authStateChanges().map((firebaseUser) {
-      final user = firebaseUser == null ? UserModel.empty : firebaseUser.toUser;
+      final user = firebaseUser == null ? UserModel.empty : firebaseUser.toUserModel;
       if (firebaseUser != null) {
         createChatUser(user);
       }
@@ -195,7 +196,7 @@ class AuthenticationRepository {
 
 extension on firebase_auth.User {
   /// Maps a [firebase_auth.User] into a [UserModel].
-  UserModel get toUser {
+  UserModel get toUserModel {
     return UserModel(id: uid, email: email, name: displayName, photo: photoURL);
   }
 }

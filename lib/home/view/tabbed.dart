@@ -1,13 +1,11 @@
-import 'package:flow_builder/flow_builder.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:padhaihub/app/app.dart';
 import 'package:padhaihub/home/cubit/home_cubit.dart';
 import 'package:padhaihub/home/routes/routes.dart';
-import 'package:padhaihub/home/widgets/overview.dart';
-import 'package:padhaihub/landing/cubit/landing_cubit.dart';
-import 'package:padhaihub/src/src.dart';
+
 
 class TabbedHomePage extends StatelessWidget {
   const TabbedHomePage._();
@@ -33,26 +31,22 @@ class TabbedHomePage extends StatelessWidget {
                 )
               ],
             ),
-            body: generateTabPage(state),
-            // bottomNavigationBar: CurvedNavigationBar(
-            //   key: _bottomNavigationKey,
-            //   backgroundColor: Theme.of(context).primaryColorDark,
-            //   items: context.read<HomeCubit>().getPageIcons().map((e) => Icon(
-            //     e,
-            //     size: 30,
-            //   )).toList(),
-            //   onTap: (index) => context.read<HomeCubit>().changePage(index),
-            // ),
-            // bottomNavigationBar: BottomNavigationBar(
-            //   currentIndex: context.read<HomeCubit>().state.status.index,
-            //   onTap: (index) => context.read<HomeCubit>().changePage(index),
-            //   selectedItemColor: Theme.of(context).colorScheme.primary,
-            //   unselectedItemColor: Theme.of(context).unselectedWidgetColor,
-            //   items: context.read<HomeCubit>().getPageIcons().map((e) => BottomNavigationBarItem(
-            //     icon: Icon(e[0], size: 30,),
-            //     label: e[1],
-            //   )).toList(),
-            // ),
+            body: PageTransitionSwitcher(
+              reverse: state.prevStatus.index - state.status.index > 0,
+                transitionBuilder: (
+                    Widget child,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                    ) {
+                  return SharedAxisTransition(
+                    animation: animation,
+                    secondaryAnimation: secondaryAnimation,
+                    transitionType: SharedAxisTransitionType.horizontal,
+                    child: child,
+                  );
+                },
+                child: generateTabPage(state)
+            ),
             bottomNavigationBar: GNav(
               haptic: true,
               activeColor: Theme.of(context).colorScheme.primary,

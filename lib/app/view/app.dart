@@ -1,15 +1,11 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flow_builder/flow_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:padhaihub/home/cubit/home_cubit.dart';
-import 'package:padhaihub/src/storageRepo.dart';
-import '../app.dart';
-import '../../config/theme.dart';
-
-import '../../src/authRepo.dart';
-import '../bloc/app_bloc.dart';
-import '../routes/routes.dart';
+import 'package:padhaihub/src/src.dart';
+import 'package:padhaihub/app/app.dart';
+import 'package:padhaihub/config/config.dart';
 
 class App extends StatelessWidget {
   const App({

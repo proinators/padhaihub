@@ -10,7 +10,7 @@ import 'package:padhaihub/src/src.dart';
 class StorageRepository {
 
   StorageRepository({
-    CacheManager? cache
+    CacheManager? cache,
   }) : _cache = cache ?? DefaultCacheManager();
 
   final CacheManager _cache;
@@ -20,30 +20,34 @@ class StorageRepository {
     _storageRef = FirebaseStorage.instance.ref();
   }
 
-  Future<void> uploadFile(String fileName, String localUri, List<types.User> users, types.User authUser, {bool isEdit=false}) async {
+  Future<void> uploadFile(String fileName, String localUri, types.Room room, types.User authUser, {bool isEdit=false}) async {
     if(!isEdit) {
       Map<String, dynamic> newMeta = authUser.metadata!;
       newMeta["files_shared"]++;
       FirebaseChatCore.instance.updateUserInFirestore(authUser.copyWith(metadata: newMeta));
     }
-    users.forEach((user) async {
-      Reference userRef = _storageRef.child("users/${user.id}/$fileName");
-      File file = File(localUri);
-      await userRef.putFile(file);
-    });
+    // for (types.User user in users) {
+    //   Reference userRef = _storageRef.child("users/${user.id}/$fileName");
+    //   File file = File(localUri);
+    //   await userRef.putFile(file);
+    // }
+    Reference userRef = _storageRef.child("rooms/${room.id}/$fileName");
+    File file = File(localUri);
+    await userRef.putFile(file);
   }
 
-  Future<String> downloadFile(String userId, String uuid, String fileName, Function onTaskStateChange) async {
+  Future<String> downloadFile(types.Room room, String uuid, String fileName, Function onTaskStateChange) async {
     final tempDir = await getApplicationDocumentsDirectory();
     final filePath = "${tempDir.path}/$uuid/$fileName";
     final file = await File(filePath).create(recursive: true);
 
-    final downloadTask = _storageRef.child("users/$userId/$uuid.pdf").writeToFile(file);
+    // final downloadTask = _storageRef.child("users/$userId/$uuid.pdf").writeToFile(file);
+    final downloadTask = _storageRef.child("rooms/${room.id}/$uuid.pdf").writeToFile(file);
     downloadTask.snapshotEvents.listen((taskSnapshot) {
       onTaskStateChange(taskSnapshot.state, filePath);
     });
     final fileUrl =
-        await _storageRef.child("users/$userId/$fileName").getDownloadURL();
+        await _storageRef.child("rooms/${room.id}/$fileName").getDownloadURL();
     print(fileUrl);
     // return (await _cache.downloadFile(fileUrl)).file.path;
     return filePath;
@@ -57,12 +61,13 @@ class StorageRepository {
         newMeta["files_shared"]--;
         FirebaseChatCore.instance.updateUserInFirestore(message.author.copyWith(metadata: newMeta));
       }
-      for (types.User user in room.users) {
-        print(_storageRef.child("users/${user.id}/${message.uri}.pdf").fullPath);
-        _storageRef.child("users/${user.id}/${message.uri}.pdf").delete();
-      }
-    } else {
-      _storageRef.child("users/${authUser.id}/${message.uri}.pdf").delete();
+      // for (types.User user in room.users) {
+      //   _storageRef.child("users/${user.id}/${message.uri}.pdf").delete();
+      // }
+      _storageRef.child("rooms/${room.id}/${message.uri}.pdf").delete();
     }
+    // else {
+    //   _storageRef.child("users/${authUser.id}/${message.uri}.pdf").delete();
+    // }
   }
 }

@@ -13,6 +13,12 @@ extension SeenStatus on FirebaseChatCore {
     );
   }
 
+  Stream<Map<String, dynamic>> getLiveMetadata(String roomId) {
+    return FirebaseChatCore.instance.rooms().map(
+        (rooms) => rooms.where((e) => e.id == roomId).first.metadata ?? {}
+    );
+  }
+
   Stream<List<types.Room>> unreadChats(String currUserId) {
     return FirebaseChatCore.instance.rooms().map(
             (rooms) => rooms.where(

@@ -52,13 +52,18 @@ class ChatScreen extends StatelessWidget {
               body: LoadingWidget(),
             );
           }
-          FirebaseChatCore.instance.seeAll(state.authUser!, state.room!);
           // state.room!.metadata?[state.authUser!.id] = DateTime.timestamp().millisecondsSinceEpoch;
           return StreamBuilder(
               initialData: [],
               stream: FirebaseChatCore.instance.messages(state.room!),
               builder: (context, snapshot) {
                 List<types.Message> messages;
+                FirebaseChatCore.instance.seeAll(state.authUser!, state.room!);
+                FirebaseChatCore.instance.getLiveMetadata(state.room!.id).listen(
+                        (event) {
+                          context.read<ChatCubit>().updateMetadata(event);
+                        }
+                );
                 if (state.room != null) {
                   types.User currUser = state.authUser!;
                   types.User otherUser = state.room!.users.where((element) => element.id != currUser.id).first;
@@ -73,39 +78,14 @@ class ChatScreen extends StatelessWidget {
                 }
                 return Scaffold(
                     appBar: AppBar(),
-                    body: BlocListener<ChatCubit, ChatState>(
-                      listener: (context, state) {
-                        if (state.errorMessage != null) {
-                          showDialog(context: context, builder: (dialogContext) {
-                            return AlertDialog(
-                              title: Text("Error"),
-                              content: Text(state.errorMessage!),
-                              actions: [
-                                ElevatedButton(
-                                  child: Text("Okay"),
-                                  onPressed:  () {Navigator.of(dialogContext, rootNavigator: true).pop();},
-                                ),
-                              ],
-                            );
-                          });
-                        }
-                      },
-                      child: ui.Chat(
-                        messages: messages,
-                        onSendPressed: context.read<ChatCubit>().onSendPressed,
-                        onAttachmentPressed: context.read<ChatCubit>().onAttachmentPressed,
-                        onMessageTap: context.read<ChatCubit>().onMessageTap,
-                        onMessageLongPress: context.read<ChatCubit>().onMessageLongPress,
-                        theme: (Theme.of(context).brightness == Brightness.light)
-                            ? ui.DefaultChatTheme(
-                          inputBackgroundColor: Theme.of(context).colorScheme.primary,
-                        )
-                            : ui.DarkChatTheme(
-                          backgroundColor: Theme.of(context).colorScheme.onSecondary,
-                          inputBackgroundColor: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                        user: state.authUser!,
-                      ),
+                    body: CustomChat(
+                      messages: messages,
+                      onSendPressed: context.read<ChatCubit>().onSendPressed,
+                      onAttachmentPressed: context.read<ChatCubit>().onAttachmentPressed,
+                      onMessageTap: context.read<ChatCubit>().onMessageTap,
+                      onMessageLongPress: context.read<ChatCubit>().onMessageLongPress,
+                      onMessageDoubleTap: context.read<ChatCubit>().onMessageDoubleTap,
+                      user: state.authUser!,
                     )
                 );
               }
@@ -115,3 +95,4 @@ class ChatScreen extends StatelessWidget {
     );
   }
 }
+

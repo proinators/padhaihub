@@ -18,7 +18,7 @@ class FloatingUploadButton extends StatelessWidget {
           ),
         )
         : Icon(Icons.upload_rounded),
-        onPressed: onPressed,
+        onPressed: (!isLoading) ? onPressed : (() {}),
     );
   }
 }

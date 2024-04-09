@@ -8,6 +8,7 @@ import 'package:padhaihub/app/app.dart';
 import 'package:padhaihub/chat/chat.dart';
 import 'package:padhaihub/chat/cubit/chat_cubit.dart';
 import 'package:padhaihub/src/src.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen._({super.key, required this.room});
@@ -53,16 +54,16 @@ class ChatScreen extends StatelessWidget {
             );
           }
           // state.room!.metadata?[state.authUser!.id] = DateTime.timestamp().millisecondsSinceEpoch;
-          return StreamBuilder(
+          return StreamBuilder<List<types.Message>>(
               initialData: [],
               stream: FirebaseChatCore.instance.messages(state.room!),
               builder: (context, snapshot) {
                 List<types.Message> messages;
                 FirebaseChatCore.instance.seeAll(state.authUser!, state.room!);
                 FirebaseChatCore.instance.getLiveMetadata(state.room!.id).listen(
-                        (event) {
-                          context.read<ChatCubit>().updateMetadata(event);
-                        }
+                  (event) {
+                    context.read<ChatCubit>().updateMetadata(event);
+                  }
                 );
                 if (state.room != null) {
                   types.User currUser = state.authUser!;

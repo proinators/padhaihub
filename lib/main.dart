@@ -23,21 +23,21 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-
-  final notificationSettings = await FirebaseMessaging.instance.requestPermission(provisional: true);
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-
   // for iOS
   // final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
   // if (apnsToken != null) {
   //   // APNS token is available, make FCM plugin API requests...
   // }
-  final notificationRepository = NotificationRepository(token: fcmToken);
+  final notificationRepository = NotificationRepository();
   final authenticationRepository = AuthenticationRepository(notificationRepository: notificationRepository);
-  final storageRepository = StorageRepository();
+  final storageRepository = StorageRepository(notificationRepository: notificationRepository);
+  final app = App(authenticationRepository: authenticationRepository, storageRepository: storageRepository,);
+  notificationRepository.init((message) {
+    runApp(app);
+  });
   await authenticationRepository.user.first;
   await storageRepository.init();
 
-  runApp(App(authenticationRepository: authenticationRepository, storageRepository: storageRepository,));
+  runApp(app);
 }
 

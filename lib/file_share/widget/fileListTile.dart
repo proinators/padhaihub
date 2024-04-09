@@ -33,7 +33,7 @@ class FileListTile extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold
                         ),
-                        overflow: TextOverflow.fade,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Padding(

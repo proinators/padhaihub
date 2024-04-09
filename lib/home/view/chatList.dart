@@ -46,7 +46,12 @@ class ChatTab extends StatelessWidget {
                     } else {
                       formattedDateTime = timeFormat.format(dateTime);
                     }
-                    final unread = snapshot.data![index].metadata?[context.read<AppBloc>().state.userModel.id] < snapshot.data![index].updatedAt;
+                    bool unread;
+                    try {
+                      unread = (snapshot.data![index].metadata?[context.read<AppBloc>().state.userModel.id]) < snapshot.data![index].updatedAt ?? double.infinity;
+                    } catch (e) {
+                      unread = false;
+                    }
                     return ChatListTile(room: snapshot.data![index], unread: unread, formattedDateTime: formattedDateTime);
                   },
                   separatorBuilder: (context, index) {

@@ -40,6 +40,10 @@ class ChatCubit extends Cubit<ChatState> {
   void onSendPressed(types.PartialText message) {
     FirebaseChatCore.instance.updateLastSeen(FirebaseChatCore.instance.firebaseUser!.uid);
     FirebaseChatCore.instance.sendMessage(message, state.room!.id);
+    storageRepo.notificationRepo.sendNotification(
+      state.room!.users.where((element) => element.id != state.authUser?.id).first.id,
+      state.room!.id,
+    );
   }
 
   void onAttachmentPressed() async {
@@ -67,6 +71,10 @@ class ChatCubit extends Cubit<ChatState> {
                 uri: fileUuid,
               );
               FirebaseChatCore.instance.sendMessage(message, state.room!.id);
+              storageRepo.notificationRepo.sendNotification(
+                  state.room!.users.where((element) => element.id != state.authUser?.id).first.id,
+                  state.room!.id,
+              );
             }
           }
       );

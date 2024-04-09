@@ -4,6 +4,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
+import 'package:padhaihub/src/notificationRepo.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:padhaihub/src/src.dart';
 
@@ -11,9 +12,11 @@ class StorageRepository {
 
   StorageRepository({
     CacheManager? cache,
-  }) : _cache = cache ?? DefaultCacheManager();
+    required NotificationRepository notificationRepository
+  }) : _cache = cache ?? DefaultCacheManager(), notificationRepo = notificationRepository;
 
   final CacheManager _cache;
+  final NotificationRepository notificationRepo;
   late Reference _storageRef;
   types.Room? publicRoom;
 

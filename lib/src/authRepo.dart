@@ -121,6 +121,7 @@ class AuthenticationRepository {
             }
         ),
       );
+      _notificationRepository.setTokenForUser(user.id);
     }
   }
 

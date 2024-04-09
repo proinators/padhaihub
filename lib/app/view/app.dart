@@ -37,34 +37,6 @@ class AppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return ThemeBuilder(
-    //   builder: (lightData, darkData, context) => MaterialApp(
-    //     title: 'PadhaiHub',
-    //     theme: lightData,
-    //     darkTheme: darkData,
-    //     home: FlowBuilder<AppStatus>(
-    //       state: context.select((AppBloc bloc) => bloc.state.status),
-    //       onGeneratePages: onGenerateAppViewPages,
-    //     ),
-    //     debugShowCheckedModeBanner: false,
-    //   ),
-    // );
-
-    // return DynamicColorBuilder(
-    //   builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic)  {
-    //     Map<Brightness, ThemeData> themes = themeBuilder(lightDynamic, darkDynamic);
-    //     return MaterialApp(
-    //       title: 'PadhaiHub',
-    //       home: FlowBuilder<AppStatus>(
-    //         state: context.select((AppBloc bloc) => bloc.state.status),
-    //         onGeneratePages: onGenerateAppViewPages,
-    //       ),
-    //       theme: themes[Brightness.light],
-    //       darkTheme: themes[Brightness.dark],
-    //       debugShowCheckedModeBanner: false,
-    //     );
-    //   },
-    // );
     Map<Brightness, ThemeData> themes = themeBuilder(null, null);
     return MaterialApp(
       title: 'PadhaiHub',

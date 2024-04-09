@@ -8,6 +8,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:padhaihub/src/notificationRepo.dart';
 import 'package:padhaihub/src/src.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
@@ -78,13 +79,16 @@ class AuthenticationRepository {
   AuthenticationRepository({
     CacheManager? cache,
     firebase_auth.FirebaseAuth? firebaseAuth,
+    required NotificationRepository notificationRepository,
     GoogleSignIn? googleSignIn,
   })  : _cache = cache ?? DefaultCacheManager(),
         _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _notificationRepository = notificationRepository,
         _googleSignIn = googleSignIn ?? GoogleSignIn.standard();
 
   final CacheManager _cache;
   final firebase_auth.FirebaseAuth _firebaseAuth;
+  final NotificationRepository _notificationRepository;
   final GoogleSignIn _googleSignIn;
   
   @visibleForTesting
@@ -121,9 +125,10 @@ class AuthenticationRepository {
   }
 
   Stream<UserModel> get user {
-    return _firebaseAuth.authStateChanges().map((firebaseUser) {
+    return _firebaseAuth.authStateChanges().asyncMap((firebaseUser) async {
       final user = firebaseUser == null ? UserModel.empty : firebaseUser.toUserModel;
       if (firebaseUser != null) {
+        _notificationRepository.setTokenForUser(user.id);
         createChatUser(user);
       }
       _saveToCache(user);
@@ -171,7 +176,10 @@ class AuthenticationRepository {
       if (_firebaseAuth.currentUser != null) {
         if (!((_firebaseAuth.currentUser?.email!.endsWith("@hyderabad.bits-pilani.ac.in") ?? false) || _firebaseAuth.currentUser?.email == "pratyushsunil@gmail.com")) {
           await logOut();
+          showToastMessage("You're only allowed to log in with your BITS email.");
           throw const LogInWithGoogleFailure("You're only allowed to log in with your BITS email.");
+        } else {
+          _notificationRepository.setTokenForUser(_firebaseAuth.currentUser!.uid);
         }
       }
     } on firebase_auth.FirebaseAuthException catch (e) {
@@ -184,6 +192,7 @@ class AuthenticationRepository {
   Future<void> logOut() async {
     try {
       await Future.wait([
+        _notificationRepository.removeTokenFromUser(_firebaseAuth.currentUser!.uid),
         _firebaseAuth.signOut(),
         _googleSignIn.signOut(),
         _saveToCache(UserModel.empty),

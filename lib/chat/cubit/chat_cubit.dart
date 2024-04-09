@@ -25,6 +25,10 @@ class ChatCubit extends Cubit<ChatState> {
     return uuid.v4();
   }
 
+  void setUploadingStatus(bool val) {
+    emit(state.copyWith(isLoading: val));
+  }
+
   void listenAuth() async {
     FirebaseChatCore.instance.currUser().listen(
             (event) {
@@ -38,7 +42,7 @@ class ChatCubit extends Cubit<ChatState> {
     FirebaseChatCore.instance.sendMessage(message, state.room!.id);
   }
 
-  void onAttachmentPressed(void Function(bool) setUploadingStatus) async {
+  void onAttachmentPressed() async {
     final result = await FilePicker.platform.pickFiles(
       dialogTitle: "Choose a PDF to be sent",
       type: FileType.custom,
@@ -76,25 +80,6 @@ class ChatCubit extends Cubit<ChatState> {
 
   void onMessageTap(BuildContext _, types.Message message) async {
     if (message is types.FileMessage) {
-      // await storageRepo.downloadFile(state.authUser.id, "${message.uri}.pdf", (TaskState taskState) {
-      //   switch(taskState) {
-      //     case TaskState.paused:
-      //       emit(state.copyWith(infoMessage: "Download paused."));
-      //       break;
-      //     case TaskState.running:
-      //       emit(state.copyWith(infoMessage: "Download paused."));
-      //       break;
-      //     case TaskState.success:
-      //       OpenFilex.open();
-      //       break;
-      //     case TaskState.canceled:
-      //       emit(state.copyWith(infoMessage: "Download cancelled."));
-      //       break;
-      //     case TaskState.error:
-      //       emit(state.copyWith(errorMessage: "Error in downloading."));
-      //       break;
-      //   }
-      // });
       String localFilename = await storageRepo.downloadFile(state.room!, message.uri, message.name, (TaskState taskState, String filePath) {
         switch(taskState) {
           case TaskState.paused:
@@ -165,7 +150,7 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void onMessageDoubleTap(BuildContext context, types.Message p1) {
-    
+    // TODO: Reply to messages
   }
 
   void updateRoom(types.Room room) {
@@ -187,16 +172,20 @@ class ChatCubit extends Cubit<ChatState> {
 
       String fileUuid = uuidGen();
       try {
+        setUploadingStatus(true);
         storageRepo.uploadFile("$fileUuid.pdf", result.files.single.path!, state.room!, state.authUser!, isEdit: true).then(
           (value) => storageRepo.deleteFile(state.authUser!, state.room!, message, isEdit: true).then(
-                  (_) => FirebaseChatCore.instance.updateMessage(
+                  (_) {
+                    setUploadingStatus(false);
+                    FirebaseChatCore.instance.updateMessage(
                       message.copyWith(
                           name: result.files.single.name,
                           size: result.files.single.size,
                           uri: fileUuid
                       ),
                       state.room!.id
-                  )));
+                  );
+                  }));
       } catch (e) {
         // emit(state.copyWith(errorMessage: (e.toString() != "") ? e.toString() : "Could not upload file."));
         showToastMessage((e.toString() != "") ? e.toString() : "Could not upload file.");

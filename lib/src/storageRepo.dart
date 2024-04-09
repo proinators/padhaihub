@@ -15,9 +15,16 @@ class StorageRepository {
 
   final CacheManager _cache;
   late Reference _storageRef;
+  types.Room? publicRoom;
 
-  void init() {
+  Future<void> init() async {
     _storageRef = FirebaseStorage.instance.ref();
+    publicRoom = await FirebaseChatCore.instance.ensurePublicRoom();
+    FirebaseChatCore.instance.publicRoomStream().listen(
+        (types.Room room) {
+          publicRoom = room;
+        }
+    );
   }
 
   Future<void> uploadFile(String fileName, String localUri, types.Room room, types.User authUser, {bool isEdit=false}) async {
@@ -36,9 +43,13 @@ class StorageRepository {
     await userRef.putFile(file);
   }
 
-  Future<String> downloadFile(types.Room room, String uuid, String fileName, Function onTaskStateChange) async {
+  Future<String> downloadFile(types.Room room, String uuid, String fileName, Function(TaskState, String) onTaskStateChange) async {
     final tempDir = await getApplicationDocumentsDirectory();
     final filePath = "${tempDir.path}/$uuid/$fileName";
+    if(await File(filePath).exists()) {
+      onTaskStateChange(TaskState.success, filePath);
+      return filePath;
+    };
     final file = await File(filePath).create(recursive: true);
 
     // final downloadTask = _storageRef.child("users/$userId/$uuid.pdf").writeToFile(file);

@@ -11,16 +11,18 @@ class CustomChat extends StatefulWidget {
     required this.onMessageTap,
     required this.onMessageLongPress,
     required this.onMessageDoubleTap,
-    required this.user
+    required this.user,
+    required this.isLoading
   });
 
   final List<types.Message> messages;
   final void Function(types.PartialText) onSendPressed;
-  final void Function(void Function(bool)) onAttachmentPressed;
+  final void Function() onAttachmentPressed;
   final void Function(BuildContext, types.Message) onMessageTap;
   final void Function(BuildContext, types.Message) onMessageLongPress;
   final void Function(BuildContext, types.Message) onMessageDoubleTap;
   final types.User user;
+  final bool isLoading;
 
   @override
   State<CustomChat> createState() => _CustomChatState();
@@ -28,24 +30,13 @@ class CustomChat extends StatefulWidget {
 
 class _CustomChatState extends State<CustomChat> {
   TextEditingController textController = TextEditingController();
-  bool _isAttachmentUploading = false;
-
-  void setUploadingStatus(bool val) {
-    setState(() {
-      _isAttachmentUploading = val;
-    });
-  }
-
-  void modifiedAttachmentPressed() {
-    widget.onAttachmentPressed(setUploadingStatus);
-  }
 
   @override
   Widget build(BuildContext context) {
     return ui.Chat(
       messages: widget.messages,
       onSendPressed: widget.onSendPressed,
-      onAttachmentPressed: modifiedAttachmentPressed,
+      onAttachmentPressed: widget.onAttachmentPressed,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
       onMessageDoubleTap: widget.onMessageDoubleTap,
@@ -57,7 +48,7 @@ class _CustomChatState extends State<CustomChat> {
         backgroundColor: Theme.of(context).colorScheme.onSecondary,
         inputBackgroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
-      isAttachmentUploading: _isAttachmentUploading,
+      isAttachmentUploading: widget.isLoading,
       inputOptions: ui.InputOptions(
         sendButtonVisibilityMode: ui.SendButtonVisibilityMode.editing,
         onTextChanged: (text) {

@@ -7,6 +7,7 @@ import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:intl/intl.dart';
 import 'package:padhaihub/app/app.dart';
 import 'package:padhaihub/home/home.dart';
+import 'package:padhaihub/src/src.dart';
 
 class ChatTab extends StatelessWidget {
   const ChatTab({super.key});
@@ -24,14 +25,18 @@ class ChatTab extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: StreamBuilder<List<types.Room>>(
             stream: FirebaseChatCore.instance.rooms(),
-            initialData: const [types.Room(id: "", type: types.RoomType.direct, users: [])],
+            initialData: const [],
             builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                if (snapshot.data?.first.id == "") {
-                  return LoadingWidget();
-                }
+              if (snapshot.hasData) {
+                // if (snapshot.data?.first.id == "") {
+                //   return LoadingWidget();
+                // }
                 return ListView.separated(
                   itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return ChatListTile(room: context.read<AppBloc>().storageRepository.publicRoom!, unread: false, formattedDateTime: "");
+                    }
+                    index--;
                     final dateTime = DateTime.fromMillisecondsSinceEpoch(snapshot.data![index].updatedAt ?? 0);
                     String formattedDateTime;
                     if (today.difference(dateTime).inDays >= 7) {
@@ -42,36 +47,7 @@ class ChatTab extends StatelessWidget {
                       formattedDateTime = timeFormat.format(dateTime);
                     }
                     final unread = snapshot.data![index].metadata?[context.read<AppBloc>().state.userModel.id] < snapshot.data![index].updatedAt;
-                    return ListTile(
-                      leading: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Theme.of(context).colorScheme.surface,
-                          image: DecorationImage(
-                            image: CachedNetworkImageProvider(
-                              snapshot.data![index].imageUrl ?? "",
-                            ),
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                          snapshot.data![index].name ?? "",
-                        style: TextStyle(
-                          fontWeight: (unread) ? FontWeight.bold : FontWeight.normal
-                        ),
-                      ),
-                      trailing: Text(
-                          formattedDateTime,
-                        style: TextStyle(
-                          color: (unread) ? Theme.of(context).colorScheme.tertiary : null,
-                        ),
-                      ),
-                      onTap: () {
-                        context.flow<NavData>().update((navData) => navData.copyWith(room: snapshot.data![index]));
-                      },
-                    );
+                    return ChatListTile(room: snapshot.data![index], unread: unread, formattedDateTime: formattedDateTime);
                   },
                   separatorBuilder: (context, index) {
                     return const Divider(
@@ -79,7 +55,7 @@ class ChatTab extends StatelessWidget {
                       height: 20,
                     );
                   },
-                  itemCount: snapshot.data?.length ?? 0,
+                  itemCount: (snapshot.data?.length ?? 0) + 1,
                 );
               } else {
                 return const Center(

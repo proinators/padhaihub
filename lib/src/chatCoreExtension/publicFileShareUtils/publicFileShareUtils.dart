@@ -2,20 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
-Future<List<types.Room>> processPublicRoomQuery(
+Future<types.Room> processPublicRoomQuery(
     FirebaseFirestore instance,
-    QuerySnapshot<Map<String, dynamic>> query,
+    DocumentSnapshot<Map<String, dynamic>> query,
     String usersCollectionName,
     ) async {
-  final futures = query.docs.map(
-        (doc) => processPublicRoomDocument(
-      doc,
+  return await processPublicRoomDocument(
+      query,
       instance,
       usersCollectionName,
-    ),
-  );
-
-  return await Future.wait(futures);
+    );
 }
 
 Future<types.Room> processPublicRoomDocument(

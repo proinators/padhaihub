@@ -77,7 +77,9 @@ class ChatScreen extends StatelessWidget {
                   )).toList() ?? [];
                 }
                 return Scaffold(
-                    appBar: AppBar(),
+                    appBar: AppBar(
+                      title: Text(state.room!.users.where((element) => element.id != state.authUser!.id).first.firstName!),
+                    ),
                     body: CustomChat(
                       messages: messages,
                       onSendPressed: context.read<ChatCubit>().onSendPressed,
@@ -86,6 +88,7 @@ class ChatScreen extends StatelessWidget {
                       onMessageLongPress: context.read<ChatCubit>().onMessageLongPress,
                       onMessageDoubleTap: context.read<ChatCubit>().onMessageDoubleTap,
                       user: state.authUser!,
+                      isLoading: state.isLoading,
                     )
                 );
               }

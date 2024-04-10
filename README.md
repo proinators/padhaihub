@@ -6,7 +6,7 @@ Notes can be shared on personal one-to-one chats as well as on a public forum.
 ## Implementation
 
 The app is meant to allow for realtime chatting and file sharing.
-Tech stack to be used along with Flutter:
+Tech stack used along with Flutter:
 1. Backend
    * [Firebase](https://firebase.google.com):
      * OAuth login for authentication
@@ -20,7 +20,7 @@ Tech stack to be used along with Flutter:
      * Source code can be found on my [repo](https://github.com/RedMiner2005/padhaihub-service).
 2. Client Logic
    * Firebase for Flutter: To integrate Firebase with the app, incl. the core package, Firestore, Firebase Auth, Firebase Storage, [firebase_ui_firestore](https://pub.dev/packages/firebase_ui_firestore) 
-   * [firebase-messaging](https://pub.dev/packages/firebase_messaging): For setting up FCM on the client side, separately mentioned as it is optional * [libsignal_protocol_dart](https://pub.dev/packages/libsignal_protocol_dart): (Optional) Messages will be made end-to-end encrypted using an implementation of the Signal Protocol
+   * [firebase-messaging](https://pub.dev/packages/firebase_messaging): For setting up FCM on the client side, separately mentioned as it is optional
    * [bloc](https://bloclibrary.dev/): For state management on the client side
 3. UI/UX
    * [animations](https://pub.dev/packages/animations) and [flutter_staggered_animations](https://pub.dev/packages/flutter_staggered_animations): For the container transform animations
@@ -38,3 +38,8 @@ Note: This may be updated along the way with changes in the features planned
 - [x] Implement push notifications
 - [x] Set up file sharing on one-one chats
 - [x] Set up a public file sharing platform ~~with topic-based categorization~~
+
+## Credits
+* SWD Nucleus - Support when I faced issues and guidance throughout the development
+* Pratyush Nair (that is, myself😁) - App Developer
+* Pavithra Ramesh - Primary app tester

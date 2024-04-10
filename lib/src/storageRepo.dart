@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -30,7 +32,19 @@ class StorageRepository {
     );
   }
 
+  Future<bool> isFirstTime(String key) async {
+    if ((await _cache.getFileFromCache(key)) == null) {
+      _cache.putFile(key, Uint8List.fromList(utf8.encode("EXISTS")));
+      return true;
+    }
+    return false;
+  }
+
   Future<void> uploadFile(String fileName, String localUri, types.Room room, types.User authUser, {bool isEdit=false}) async {
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     if(!isEdit) {
       Map<String, dynamic> newMeta = authUser.metadata!;
       newMeta["files_shared"]++;
@@ -46,13 +60,17 @@ class StorageRepository {
     await userRef.putFile(file);
   }
 
-  Future<String> downloadFile(types.Room room, String uuid, String fileName, Function(TaskState, String) onTaskStateChange) async {
+  Future<void> downloadFile(types.Room room, String uuid, String fileName, Function(TaskState, String) onTaskStateChange) async {
     final tempDir = await getApplicationDocumentsDirectory();
     final filePath = "${tempDir.path}/$uuid/$fileName";
     if(await File(filePath).exists()) {
       onTaskStateChange(TaskState.success, filePath);
-      return filePath;
+      return;
     };
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     final file = await File(filePath).create(recursive: true);
 
     // final downloadTask = _storageRef.child("users/$userId/$uuid.pdf").writeToFile(file);
@@ -64,10 +82,14 @@ class StorageRepository {
         await _storageRef.child("rooms/${room.id}/$fileName").getDownloadURL();
     print(fileUrl);
     // return (await _cache.downloadFile(fileUrl)).file.path;
-    return filePath;
+    return;
   }
 
   Future<void> deleteFile(types.User authUser, types.Room room, types.FileMessage message, {bool isEdit=false}) async {
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     if (message.author.id == authUser.id) {
       // (await FirebaseChatCore.instance.users().first).where((element) => element.id == authUser.id)
       if(!isEdit) {

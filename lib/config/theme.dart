@@ -1,5 +1,4 @@
-// Built on
-import 'package:dynamic_color/dynamic_color.dart';
+// import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:padhaihub/config/consts.dart';
 
@@ -17,12 +16,14 @@ Map<Brightness, ThemeData> themeBuilder(ColorScheme? lightDynamic, ColorScheme? 
     ColorScheme darkColorScheme;
 
     if (lightDynamic != null && darkDynamic != null) {
-      lightColorScheme = lightDynamic.harmonized();
+      // lightColorScheme = lightDynamic.harmonized();
+      lightColorScheme = lightDynamic;
       lightColorScheme =
           lightColorScheme.copyWith(secondary: brandingColor);
       lightCustomColors = lightCustomColors.harmonized(lightColorScheme);
 
-      darkColorScheme = darkDynamic.harmonized();
+      // darkColorScheme = darkDynamic.harmonized();
+      darkColorScheme = darkDynamic;
       darkColorScheme =
           darkColorScheme.copyWith(secondary: brandingColor);
       darkCustomColors = darkCustomColors.harmonized(darkColorScheme);
@@ -105,10 +106,15 @@ class CustomColors extends ThemeExtension<CustomColors> {
   }
 
   CustomColors harmonized(ColorScheme dynamic) {
+    // return copyWith(
+    //     danger: danger!.harmonizeWith(dynamic.primary),
+    //     landing1: landing1!.harmonizeWith(dynamic.primary),
+    //     landing2: landing2!.harmonizeWith(dynamic.primary)
+    // );
     return copyWith(
-        danger: danger!.harmonizeWith(dynamic.primary),
-        landing1: landing1!.harmonizeWith(dynamic.primary),
-        landing2: landing2!.harmonizeWith(dynamic.primary)
+        danger: danger!,
+        landing1: landing1!,
+        landing2: landing2!
     );
   }
 }

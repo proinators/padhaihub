@@ -1,19 +1,35 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:padhaihub/app/app.dart';
+import 'package:padhaihub/config/consts.dart';
 import 'package:padhaihub/file_share/file_share.dart';
 import 'package:padhaihub/file_share/widget/uploadButton.dart';
 import 'package:padhaihub/src/chatCoreExtension/chatCoreExtension.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
-class FileListPage extends StatelessWidget {
-  const FileListPage._({super.key});
+class FileListPage extends StatefulWidget {
+  FileListPage._({super.key});
 
+  Timer? metadataWorker;
 
   static Page<void> page(types.Room room) =>
       MaterialPage<void>(child: FileListPage._());
+
+  @override
+  State<FileListPage> createState() => _FileListPageState();
+}
+
+class _FileListPageState extends State<FileListPage> {
+
+  @override
+  void dispose() {
+    widget.metadataWorker?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +67,20 @@ class FileListPage extends StatelessWidget {
                       return const EmptyWidget();
                     }
                     List<types.FileMessage> messages = snapshot.data!.where((element) => element is types.FileMessage).cast<types.FileMessage>().toList();
-                    FirebaseChatCore.instance.seeAll(state.authUser!, room, numberMessages: messages.length);
-                    FirebaseChatCore.instance.getLiveMetadata(room.id).listen(
-                        (event) {
-                          context.read<FileShareCubit>().updateMetadata(event);
-                        }
-                    );
+                    FileShareCubit cubit = context.read<FileShareCubit>();
+                    if (!cubit.metadataLock) {
+                      cubit.metadataLock = true;
+                      FirebaseChatCore.instance.seeAll(state.authUser!, state.room, numberMessages: messages.length);
+                    }
+                    if(widget.metadataWorker == null) {
+                      widget.metadataWorker = Timer.periodic(
+                          METADATA_WORKER_CLOCK,
+                              (timer) {
+                            cubit.metadataLock = false;
+                            cubit.getLiveMetadata();
+                          }
+                      );
+                    }
                     return SearchableList(
                       initialList: messages,
                       builder: (List<types.FileMessage> filteredMessages, int index, types.FileMessage message) {

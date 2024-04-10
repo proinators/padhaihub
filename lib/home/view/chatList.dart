@@ -4,8 +4,10 @@ import 'package:flow_builder/flow_builder.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:intl/intl.dart';
 import 'package:padhaihub/app/app.dart';
+import 'package:padhaihub/config/config.dart';
 import 'package:padhaihub/home/home.dart';
 import 'package:padhaihub/src/src.dart';
 
@@ -34,7 +36,16 @@ class ChatTab extends StatelessWidget {
                 return ListView.separated(
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      return ChatListTile(room: context.read<AppBloc>().storageRepository.publicRoom!, unread: false, formattedDateTime: "");
+                      return AnimationConfiguration.staggeredList(
+                        position: 2 * index,
+                        duration: Duration(milliseconds: STAGGERED_DURATION.inMilliseconds~/2),
+                        child: SlideAnimation(
+                          verticalOffset: STAGGERED_SLIDE_OFFSET,
+                          child: FadeInAnimation(
+                            child: ChatListTile(room: context.read<AppBloc>().storageRepository.publicRoom!, unread: false, formattedDateTime: ""),
+                          ),
+                        ),
+                      );
                     }
                     index--;
                     final dateTime = DateTime.fromMillisecondsSinceEpoch(snapshot.data![index].updatedAt ?? 0);
@@ -52,12 +63,27 @@ class ChatTab extends StatelessWidget {
                     } catch (e) {
                       unread = false;
                     }
-                    return ChatListTile(room: snapshot.data![index], unread: unread, formattedDateTime: formattedDateTime);
+                    return AnimationConfiguration.staggeredList(
+                      position: 2 * index,
+                      duration: Duration(milliseconds: STAGGERED_DURATION.inMilliseconds~/2),
+                      child: SlideAnimation(
+                        verticalOffset: STAGGERED_SLIDE_OFFSET,
+                        child: FadeInAnimation(
+                          child: ChatListTile(room: snapshot.data![index], unread: unread, formattedDateTime: formattedDateTime),
+                        ),
+                      ),
+                    );
                   },
                   separatorBuilder: (context, index) {
-                    return const Divider(
-                      thickness: 1,
-                      height: 20,
+                    return AnimationConfiguration.staggeredList(
+                      position: 2 * index + 1,
+                      duration: Duration(milliseconds: STAGGERED_DURATION.inMilliseconds~/2),
+                      child: FadeInAnimation(
+                        child: const Divider(
+                          thickness: 1,
+                          height: 20,
+                        ),
+                      ),
                     );
                   },
                   itemCount: (snapshot.data?.length ?? 0) + 1,

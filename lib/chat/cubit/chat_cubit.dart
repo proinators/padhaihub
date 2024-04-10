@@ -9,6 +9,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:equatable/equatable.dart';
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:padhaihub/config/config.dart';
 import 'package:padhaihub/src/src.dart';
 import 'package:uuid/uuid.dart';
 
@@ -20,6 +21,8 @@ class ChatCubit extends Cubit<ChatState> {
 
   final uuid = Uuid();
   final StorageRepository storageRepo;
+  bool metadataLock = false;
+  bool blah = false;
 
   String uuidGen() {
     return uuid.v4();
@@ -29,15 +32,23 @@ class ChatCubit extends Cubit<ChatState> {
     emit(state.copyWith(isLoading: val));
   }
 
+  Future<void> getLiveMetadata() async {
+    emit(state.copyWith(metadata: await FirebaseChatCore.instance.getLiveMetadata(state.room!.id)));
+  }
+
   void listenAuth() async {
     FirebaseChatCore.instance.currUser().listen(
-            (event) {
-              emit(state.copyWith(authUser: event));
-            }
+        (event) {
+          emit(state.copyWith(authUser: event));
+        }
     );
   }
 
-  void onSendPressed(types.PartialText message) {
+  void onSendPressed(types.PartialText message) async {
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     FirebaseChatCore.instance.updateLastSeen(FirebaseChatCore.instance.firebaseUser!.uid);
     FirebaseChatCore.instance.sendMessage(message, state.room!.id);
     storageRepo.notificationRepo.sendNotification(
@@ -47,6 +58,10 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void onAttachmentPressed() async {
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     final result = await FilePicker.platform.pickFiles(
       dialogTitle: "Choose a PDF to be sent",
       type: FileType.custom,
@@ -88,7 +103,7 @@ class ChatCubit extends Cubit<ChatState> {
 
   void onMessageTap(BuildContext _, types.Message message) async {
     if (message is types.FileMessage) {
-      String localFilename = await storageRepo.downloadFile(state.room!, message.uri, message.name, (TaskState taskState, String filePath) {
+      await storageRepo.downloadFile(state.room!, message.uri, message.name, (TaskState taskState, String filePath) {
         switch(taskState) {
           case TaskState.paused:
             // emit(state.copyWith(infoMessage: "Download paused."));
@@ -112,7 +127,6 @@ class ChatCubit extends Cubit<ChatState> {
             break;
         }
       });
-      print(localFilename);
     }
   }
 
@@ -166,6 +180,10 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void _editFileMessage(types.Message message) async {
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     if (message is types.FileMessage) {
       final result = await FilePicker.platform.pickFiles(
           dialogTitle: "Choose a PDF to be sent",
@@ -203,7 +221,11 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  void _deleteMessage(types.Message message) {
+  Future<void> _deleteMessage(types.Message message) async {
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     FirebaseChatCore.instance.deleteMessage(state.room!.id, message.id);
     if (message is types.FileMessage) {
       storageRepo.deleteFile(state.authUser!, state.room!, message);
@@ -211,6 +233,13 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void updateMetadata(Map<String, dynamic> metadata) {
-    emit(state.copyWith(room: state.room?.copyWith(metadata: metadata)));
+    emit(state.copyWith(metadata: metadata));
+  }
+
+  Future<void> showTutorialIfFirst(void Function() showTutorialDialog) async {
+    if(await storageRepo.isFirstTime(CHAT_OPEN_KEY)) {
+      blah = true;
+      showTutorialDialog();
+    }
   }
 }

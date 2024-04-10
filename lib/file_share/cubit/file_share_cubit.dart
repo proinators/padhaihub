@@ -17,9 +17,14 @@ class FileShareCubit extends Cubit<FileShareState> {
 
   final StorageRepository storageRepo;
   final uuid = Uuid();
+  bool metadataLock = false;
 
   String uuidGen() {
     return uuid.v4();
+  }
+
+  Future<void> getLiveMetadata() async {
+    emit(state.copyWith(room: state.room.copyWith(metadata: await FirebaseChatCore.instance.getLiveMetadata(state.room.id))));
   }
 
   void setUploadStatus(bool val) {
@@ -35,6 +40,10 @@ class FileShareCubit extends Cubit<FileShareState> {
   }
 
   void onUpload() async {
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     final result = await FilePicker.platform.pickFiles(
         dialogTitle: "Choose a PDF to be sent",
         type: FileType.custom,
@@ -72,7 +81,7 @@ class FileShareCubit extends Cubit<FileShareState> {
 
   void onNoteTap(BuildContext _, types.Message message) async {
     if (message is types.FileMessage) {
-      String localFilename = await storageRepo.downloadFile(state.room, message.uri, message.name, (TaskState taskState, String filePath) {
+      await storageRepo.downloadFile(state.room, message.uri, message.name, (TaskState taskState, String filePath) {
         switch(taskState) {
           case TaskState.paused:
             showToastMessage("Download paused.");
@@ -92,7 +101,6 @@ class FileShareCubit extends Cubit<FileShareState> {
             break;
         }
       });
-      print(localFilename);
     }
   }
 
@@ -138,6 +146,10 @@ class FileShareCubit extends Cubit<FileShareState> {
   }
 
   void _editFileMessage(types.Message message) async {
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     if (message is types.FileMessage) {
       final result = await FilePicker.platform.pickFiles(
           dialogTitle: "Choose a PDF to be sent",
@@ -176,7 +188,11 @@ class FileShareCubit extends Cubit<FileShareState> {
     }
   }
 
-  void _deleteMessage(types.Message message) {
+  Future<void> _deleteMessage(types.Message message) async {
+    if(!(await checkConnectivity())) {
+      showToastMessage("You are offline.");
+      return;
+    }
     FirebaseChatCore.instance.deleteMessage(state.room.id, message.id);
     if (message is types.FileMessage) {
       storageRepo.deleteFile(state.authUser!, state.room, message);

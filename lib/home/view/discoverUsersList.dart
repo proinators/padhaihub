@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:padhaihub/app/app.dart';
+import 'package:padhaihub/config/config.dart';
 import 'package:padhaihub/home/home.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
@@ -25,19 +27,19 @@ class DiscoverUserTab extends StatelessWidget {
                 if (snapshot.data?.first.id == "") {
                   return LoadingWidget();
                 }
-                // return ListView.separated(
-                //   itemBuilder: (context, index) {
-                //     return UserItem(user: snapshot.data![index]);
-                //   },
-                //   separatorBuilder: (context, index) {
-                //     return Divider();
-                //   },
-                //   itemCount: snapshot.data?.length ?? 0,
-                // );
                 return SearchableList(
                   initialList: snapshot.data!,
                   builder: (_, int index, types.User user) {
-                    return UserItem(user: user);
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: STAGGERED_DURATION,
+                      child: SlideAnimation(
+                        verticalOffset: STAGGERED_SLIDE_OFFSET,
+                        child: FadeInAnimation(
+                          child: UserItem(user: user),
+                        ),
+                      ),
+                    );
                   },
                   filter: (value) => snapshot.data!.where(
                           (element) =>

@@ -4,22 +4,28 @@ import 'package:padhaihub/config/config.dart';
 import 'package:padhaihub/src/src.dart';
 
 extension SeenStatus on FirebaseChatCore {
-  void seeAll(types.User user, types.Room currRoom, {int? numberMessages}) async {
+  Future<void> seeAll(types.User user, types.Room currRoom, {int? numberMessages, Map<String, dynamic>? metadata}) async {
+
+    if (metadata == null) {
+      metadata = currRoom.metadata ?? (await FirebaseChatCore.instance.getLiveMetadata(currRoom.id));
+    }
+    print(currRoom.id);
+    print("See all messages");
     if(currRoom.id != PUBLIC_ROOM_ID) {
-      currRoom.metadata?[user.id] = DateTime.timestamp().millisecondsSinceEpoch;
+      metadata[user.id] = DateTime.timestamp().millisecondsSinceEpoch;
     } else {
-      currRoom.metadata?[user.id] = numberMessages!;
+      metadata[user.id] = numberMessages!;
     }
     final room = await getFirebaseFirestore()
         .collection(config.roomsCollectionName)
         .doc(currRoom.id)
         .update({
-      'metadata': currRoom.metadata,
+      'metadata': metadata,
     }
     );
   }
 
-  Stream<Map<String, dynamic>> getLiveMetadata(String roomId) {
+  Stream<Map<String, dynamic>> liveMetadata(String roomId) {
     if(roomId == PUBLIC_ROOM_ID) {
       return publicRoomStream().map((event) => event.metadata ?? {});
     }
@@ -28,10 +34,21 @@ extension SeenStatus on FirebaseChatCore {
     );
   }
 
+  Future<Map<String, dynamic>> getLiveMetadata(String roomId) async {
+    if(roomId == PUBLIC_ROOM_ID) {
+      return await publicRoomStream().map((event) => event.metadata ?? {}).first;
+    }
+    return await rooms().map(
+            (rooms) => rooms.where((e) => e.id == roomId).first.metadata ?? {}
+    ).first;
+  }
+
   Stream<List<types.Room>> unreadChats(String currUserId) {
     return rooms().map(
             (rooms) => rooms.where(
-                    (room) => room.metadata?[currUserId] < room.updatedAt
+                    (room) {
+                      return room.metadata?[currUserId] < room.updatedAt;
+                    }
             ).toList()
     );
   }

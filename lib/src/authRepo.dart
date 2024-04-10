@@ -103,7 +103,7 @@ class AuthenticationRepository {
   /// Emits [UserModel.empty] if the user is not authenticated.
 
   Future<File> _saveToCache(UserModel user) {
-    return _cache.putFile("auth_result", Uint8List.fromList(utf8.encode(jsonEncode({userCacheKey: user.toJSON()}))));;
+    return _cache.putFile("auth_result", Uint8List.fromList(utf8.encode(jsonEncode({userCacheKey: user.toJSON()}))));
   }
 
   Future<void> createChatUser(UserModel user) async {
